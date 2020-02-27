@@ -9,25 +9,35 @@ Usage:
                 <script type="text/javascript" src="<?php echo $BASE_URL;?>csb-themes/default/js/input-validation.js"></script>
                 <script type="text/javascript">
                     // Create object
-                    let OBJNAME = new Validation("FORM NAME");
+                    let OBJNAME = new Validation("FORM NAME", "SUBMIT BUTTON NAME");
                     // Validation Functions
+                    OBJNAME.requireText(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray);
                 </script>
 
         3. Use the following function to check for string issues:
                 OBJNAME.checkString(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray)
 
-        4. Note: This script uses the NAME of the input, NOT the id.
+        4. Note: This script uses the NAMES of the inputs, NOT the ids.
 */
 
 
 
 class Validation
 {
-    constructor(formName)
+    constructor(formName, submitButtonName)
     {
+        // Form globals
         this.form = $('form[name ="' + formName + '"]');
+        this.submitButton = $('input[name ="' + submitButtonName + '"]');
+        this.submitButtonText = this.submitButton.val(); 
+        // Global input array
+        this.inputLog = [];       
+        // Basic css classes
         this.validC = "is-valid";
         this.invalidC = "is-invalid";
+
+        // Enables submit listener
+        this.checkAll();
     }
 
 
@@ -39,7 +49,7 @@ class Validation
         The functions in this category are called by developers to add a responsive layer of form validation
     */
 
-    checkString(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray)
+    requireText(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray)
     {
 
         let input = $('input[name ="' + inputName + '"]');
@@ -47,15 +57,26 @@ class Validation
 
         // Create requried *
         this.createAsterisk(input);
+
+        // Add this input to the input log, for easy check alls
+        this.inputLog.push(["requireText", inputName, minLength, maxLength, illegalCharArray, necessaryCharArray]);
             
         // Check string for issues while editing
         $(input).on('input focus', input, () =>
         {
+            
+
             // Append any invalid issues to string when editing
             invalidString = "";
             invalidString += this.lengthFlag(input, minLength, maxLength);
             invalidString += this.illegalCharFlag(input, illegalCharArray);
             this.applyRestrictions(input, inputName, invalidString);
+        });
+
+        // Enable submit again on an input change
+        $(input).on('input', input, () =>
+        {
+            this.submitDisabled(false, this.submitButtonText);
         });
 
         // Check string for issues after editing
@@ -65,6 +86,8 @@ class Validation
             this.applyRestrictions(input, inputName, invalidString)
             this.removeValid(input);
         });
+
+        return invalidString;
 
     }
 
@@ -138,7 +161,6 @@ class Validation
     // Check if doesnt contain needed text
     necessaryCharFlag(input, necessaryCharArray)
     {
-
         let notUsed = "";
 
         // loop through each illegal item to check for
@@ -159,8 +181,61 @@ class Validation
         {
             return "Must contain:" + notUsed + ". ";
         }
-
     }
+
+
+      ////////////////
+     // Check Alls //
+    ////////////////
+    /*
+        These functions deal with form submission, checking all inputs before allowing submission
+    */
+
+    // Enable/Disable the submit button, and change its value
+    submitDisabled(trueFalse, value)
+    {
+        $(this.submitButton).prop('disabled', trueFalse);
+        $(this.submitButton).val(value);
+    }
+
+    // Check every input added to the object.
+    checkAll()
+    {
+        $(this.form).submit( (e) =>
+        {
+            // Loop through every input added to object
+            $(this.inputLog).each( (i) =>
+            {
+                let invalidString = "";
+
+                // Make block scope elements to help understand which elements in the array are which
+                let input = $('input[name ="' + this.inputLog[i][1] + '"]');
+                let inputName = this.inputLog[i][1];
+                let minLength = this.inputLog[i][2]
+                let maxLength = this.inputLog[i][3]
+                let illegalCharArray = this.inputLog[i][4]
+                let necessaryCharArray = this.inputLog[i][5]
+
+                // Check all requiredText inputs
+                if (this.inputLog[i][0] === "requireText")
+                {
+                    // Perform all the checks that requireText() does, but only apply negative restrictions
+                    invalidString = "";
+                    invalidString += this.lengthFlag(input, minLength, maxLength);
+                    invalidString += this.illegalCharFlag(input, illegalCharArray);
+                    invalidString += this.necessaryCharFlag(input, necessaryCharArray);
+                    if (invalidString)
+                    {
+                        this.applyRestrictions(input, inputName, invalidString);
+                        this.submitDisabled(true, "Error, please check your form");
+                        // Stop submission
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+    }
+
 
 
       ////////////////////
