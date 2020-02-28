@@ -49,9 +49,12 @@ class Validation
         The functions in this category are called by developers to add a responsive layer of form validation
     */
 
+
+    /*
+        Make a general text input required for form submission.
+    */
     requireText(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray)
     {
-
         let input = $('input[name ="' + inputName + '"]');
         let invalidString = "";
 
@@ -64,13 +67,11 @@ class Validation
         // Check string for issues while editing
         $(input).on('input focus', input, () =>
         {
-            
-
             // Append any invalid issues to string when editing
             invalidString = "";
             invalidString += this.lengthFlag(input, minLength, maxLength);
             invalidString += this.illegalCharFlag(input, illegalCharArray);
-            this.applyRestrictions(input, inputName, invalidString);
+            this.showWarning(input, inputName, invalidString);
         });
 
         // Enable submit again on an input change
@@ -83,13 +84,82 @@ class Validation
         $(input).on('focusout', input, () =>
         {
             invalidString += this.necessaryCharFlag(input, necessaryCharArray);
-            this.applyRestrictions(input, inputName, invalidString)
+            this.showWarning(input, inputName, invalidString);
+            // Remove green border
             this.removeValid(input);
         });
 
         return invalidString;
-
     }
+
+
+
+    /*
+        Used for registering passwords. Almost the same as the requireText() function. This function requires at least
+        one special character and number in the password. It is also possible to assign a confirmation input using passConfirmName.
+    */
+    registerPassword(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmName)
+    {
+        let input = $('input[name ="' + inputName + '"]');
+        let passConfirm = $('input[name ="' + passConfirmName + '"]');
+        let invalidString = "";
+
+        // Create requried *
+        this.createAsterisk(input);
+        this.createAsterisk(passConfirm);
+
+        // Add this input to the input log, for easy check alls
+        this.inputLog.push(["registerPassword", inputName, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmName]);
+        
+        // Check string for issues while editing
+        $(input).on('input focus', input, () =>
+        {
+            // Append any invalid issues to string when editing
+            invalidString = "";
+            invalidString += this.lengthFlag(input, minLength, maxLength);
+            invalidString += this.illegalCharFlag(input, illegalCharArray);
+            this.showWarning(input, inputName, invalidString);
+        });
+
+        // Enable submit again on an input change
+        $(input).on('input', input, () =>
+        {
+            this.submitDisabled(false, this.submitButtonText);
+        });
+
+        // Check string for issues after editing
+        $(input).on('focusout', input, () =>
+        {
+            invalidString += this.necessaryCharFlag(input, necessaryCharArray);
+            invalidString += this.numberFlag(input);
+            invalidString += this.specialCharFlag(input);
+            this.showWarning(input, inputName, invalidString);
+            // Remove green border
+            this.removeValid(input);
+        });
+
+        // Check if confirmation input matches the password input
+        $(passConfirm).on('input focus', passConfirm, () =>
+        {
+            this.showWarning(passConfirm, passConfirmName, this.passwordMatchFlag(input, passConfirm));
+        });
+
+        $(passConfirm).on('focusout', passConfirm, () =>
+        {
+            this.showWarning(passConfirm, passConfirmName, this.passwordMatchFlag(input, passConfirm));
+            // Remove green border
+            this.removeValid(passConfirm);
+        });
+
+        return invalidString;
+    }
+
+
+
+
+
+
+
 
 
 
@@ -124,7 +194,6 @@ class Validation
     // Checks if contains unwanted text
     illegalCharFlag(input, illegalCharArray)
     {
-
         // Reset loop stringe
         let illegalsUsed = "";
         // loop through each illegal item to check for
@@ -142,7 +211,6 @@ class Validation
                 {
                     illegalsUsed += " spaces"
                 }
-                
             }
         });
 
@@ -155,14 +223,12 @@ class Validation
         {
             return "Cannot use:" + illegalsUsed + ". ";
         }
-
     }
 
     // Check if doesnt contain needed text
     necessaryCharFlag(input, necessaryCharArray)
     {
         let notUsed = "";
-
         // loop through each illegal item to check for
         $(necessaryCharArray).each(function()
         {
@@ -183,6 +249,45 @@ class Validation
         }
     }
 
+    // Ensure that input has at least one number
+    numberFlag(input)
+    {
+        if (!input.val().match(/\d/))
+        {
+            return "Must contain a number. ";
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    // Ensure there is at least one special character
+    specialCharFlag(input)
+    {
+        if (!input.val().match(/\W|_/g))
+        {
+            return "Must contain a special character. ";
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    // Check if passwords match
+    passwordMatchFlag(input, passConfirm)
+    {
+        if (input.val() === passConfirm.val())
+        {
+            return "";
+        }
+        else
+        {
+            return "Passwords do not match. ";
+        }
+    }
+
 
       ////////////////
      // Check Alls //
@@ -191,12 +296,14 @@ class Validation
         These functions deal with form submission, checking all inputs before allowing submission
     */
 
+
     // Enable/Disable the submit button, and change its value
     submitDisabled(trueFalse, value)
     {
         $(this.submitButton).prop('disabled', trueFalse);
         $(this.submitButton).val(value);
     }
+
 
     // Check every input added to the object.
     checkAll()
@@ -207,18 +314,19 @@ class Validation
             $(this.inputLog).each( (i) =>
             {
                 let invalidString = "";
-
-                // Make block scope elements to help understand which elements in the array are which
-                let input = $('input[name ="' + this.inputLog[i][1] + '"]');
-                let inputName = this.inputLog[i][1];
-                let minLength = this.inputLog[i][2]
-                let maxLength = this.inputLog[i][3]
-                let illegalCharArray = this.inputLog[i][4]
-                let necessaryCharArray = this.inputLog[i][5]
+                
 
                 // Check all requiredText inputs
                 if (this.inputLog[i][0] === "requireText")
                 {
+                    // Make block scope elements to help understand which elements in the array are which
+                    let input = $('input[name ="' + this.inputLog[i][1] + '"]');
+                    let inputName = this.inputLog[i][1];
+                    let minLength = this.inputLog[i][2];
+                    let maxLength = this.inputLog[i][3];
+                    let illegalCharArray = this.inputLog[i][4];
+                    let necessaryCharArray = this.inputLog[i][5];
+
                     // Perform all the checks that requireText() does, but only apply negative restrictions
                     invalidString = "";
                     invalidString += this.lengthFlag(input, minLength, maxLength);
@@ -226,7 +334,36 @@ class Validation
                     invalidString += this.necessaryCharFlag(input, necessaryCharArray);
                     if (invalidString)
                     {
-                        this.applyRestrictions(input, inputName, invalidString);
+                        this.showWarning(input, inputName, invalidString);
+                        this.submitDisabled(true, "Error, please check your form");
+                        // Stop submission
+                        e.preventDefault();
+                    }
+                }
+
+                // Check all password registration
+                if (this.inputLog[i][0] === "registerPassword")
+                {
+                    // Make block scope elements to help understand which elements in the array are which
+                    let input = $('input[name ="' + this.inputLog[i][1] + '"]');
+                    let inputName = this.inputLog[i][1];
+                    let minLength = this.inputLog[i][2];
+                    let maxLength = this.inputLog[i][3];
+                    let illegalCharArray = this.inputLog[i][4];
+                    let necessaryCharArray = this.inputLog[i][5];
+                    let passConfirm = $('input[name ="' + this.inputLog[i][6] + '"]');
+
+                    // Perform all the checks that requireText() does, but only apply negative restrictions
+                    invalidString = "";
+                    invalidString += this.lengthFlag(input, minLength, maxLength);
+                    invalidString += this.illegalCharFlag(input, illegalCharArray);
+                    invalidString += this.necessaryCharFlag(input, necessaryCharArray);
+                    invalidString += this.numberFlag(input);
+                    invalidString += this.specialCharFlag(input);
+                    invalidString += this.passwordMatchFlag(input, passConfirm);
+                    if (invalidString)
+                    {
+                        this.showWarning(input, inputName, invalidString);
                         this.submitDisabled(true, "Error, please check your form");
                         // Stop submission
                         e.preventDefault();
@@ -246,7 +383,7 @@ class Validation
     */
 
     // Perform restrictions depending on the input
-    applyRestrictions(input, inputName, invalidString)
+    showWarning(input, inputName, invalidString)
     {
         // Provide proper styling and feedback
         if (invalidString)
