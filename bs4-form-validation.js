@@ -1,37 +1,20 @@
 /*
-Author:     colmeye
-Purpose:    Allow simple responsive input validation options in Bootstrap 4.
-
-Usage:
-        1. Add form-control class to all inputs.
-
-        2. Paste this code near bottom of page:
-                <script type="text/javascript" src="<?php echo $BASE_URL;?>csb-themes/default/js/input-validation.js"></script>
-                <script type="text/javascript">
-                    // Create object
-                    let OBJNAME = new Validation("FORM NAME", "SUBMIT BUTTON NAME");
-                    // Validation Functions
-                    OBJNAME.requireText(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray);
-                </script>
-
-        3. Use the following function to check for string issues:
-                OBJNAME.checkString(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray)
-
-        4. Note: This script uses the NAMES of the inputs, NOT the ids.
+    Instructions and info at: https://github.com/colmeye/BS4-Form-Validation
 */
-
-
 
 class Validation
 {
-    constructor(formName, submitButtonName)
+
+    constructor(formName)
     {
         // Form globals
         this.form = $('form[name ="' + formName + '"]');
-        this.submitButton = $('input[name ="' + submitButtonName + '"]');
-        this.submitButtonText = this.submitButton.val(); 
+        this.submitButton = $(this.form).find('input[type="submit"]');
+        this.submitButtonText = this.submitButton.val();
+
         // Global input array
-        this.inputLog = [];       
+        this.inputLog = [];
+
         // Basic css classes
         this.validC = "is-valid";
         this.invalidC = "is-invalid";
@@ -55,6 +38,47 @@ class Validation
     */
     requireText(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray)
     {
+        let input = $('input[name="' + inputName + '"]');
+        let invalidString = "";
+
+        // Create requried *
+        this.createAsterisk(input);
+
+        // Add this input to the input log, for easy check alls
+        this.inputLog.push(["requireText", inputName, minLength, maxLength, illegalCharArray, necessaryCharArray]);
+            
+        // Check string for issues while editing
+        $(input).on('input focus', input, () =>
+        {
+            // Append any invalid issues to string when editing
+            invalidString = "";
+            invalidString += this.lengthCheck(input, minLength, maxLength);
+            invalidString += this.illegalCharCheck(input, illegalCharArray);
+            this.showWarning(input, inputName, invalidString);
+        });
+
+        // Enable submit again on an input change
+        $(input).on('input', input, () =>
+        {
+            this.submitDisabled(false, this.submitButtonText);
+        });
+
+        // Check string for issues after editing
+        $(input).on('focusout', input, () =>
+        {
+            invalidString += this.necessaryCharCheck(input, necessaryCharArray);
+            this.showWarning(input, inputName, invalidString);
+            // Remove green border
+            this.removeValid(input);
+        });
+
+        return invalidString;
+    }
+
+
+
+    requireEmail(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray)
+    {
         let input = $('input[name ="' + inputName + '"]');
         let invalidString = "";
 
@@ -69,8 +93,8 @@ class Validation
         {
             // Append any invalid issues to string when editing
             invalidString = "";
-            invalidString += this.lengthFlag(input, minLength, maxLength);
-            invalidString += this.illegalCharFlag(input, illegalCharArray);
+            invalidString += this.lengthCheck(input, minLength, maxLength);
+            invalidString += this.illegalCharCheck(input, illegalCharArray);
             this.showWarning(input, inputName, invalidString);
         });
 
@@ -83,7 +107,8 @@ class Validation
         // Check string for issues after editing
         $(input).on('focusout', input, () =>
         {
-            invalidString += this.necessaryCharFlag(input, necessaryCharArray);
+            invalidString += this.necessaryCharCheck(input, necessaryCharArray);
+            invalidString += this.emailCheck(input);
             this.showWarning(input, inputName, invalidString);
             // Remove green border
             this.removeValid(input);
@@ -116,8 +141,8 @@ class Validation
         {
             // Append any invalid issues to string when editing
             invalidString = "";
-            invalidString += this.lengthFlag(input, minLength, maxLength);
-            invalidString += this.illegalCharFlag(input, illegalCharArray);
+            invalidString += this.lengthCheck(input, minLength, maxLength);
+            invalidString += this.illegalCharCheck(input, illegalCharArray);
             this.showWarning(input, inputName, invalidString);
         });
 
@@ -130,9 +155,9 @@ class Validation
         // Check string for issues after editing
         $(input).on('focusout', input, () =>
         {
-            invalidString += this.necessaryCharFlag(input, necessaryCharArray);
-            invalidString += this.numberFlag(input);
-            invalidString += this.specialCharFlag(input);
+            invalidString += this.necessaryCharCheck(input, necessaryCharArray);
+            invalidString += this.numberCheck(input);
+            invalidString += this.specialCharCheck(input);
             this.showWarning(input, inputName, invalidString);
             // Remove green border
             this.removeValid(input);
@@ -141,12 +166,12 @@ class Validation
         // Check if confirmation input matches the password input
         $(passConfirm).on('input focus', passConfirm, () =>
         {
-            this.showWarning(passConfirm, passConfirmName, this.passwordMatchFlag(input, passConfirm));
+            this.showWarning(passConfirm, passConfirmName, this.passwordMatchCheck(input, passConfirm));
         });
 
         $(passConfirm).on('focusout', passConfirm, () =>
         {
-            this.showWarning(passConfirm, passConfirmName, this.passwordMatchFlag(input, passConfirm));
+            this.showWarning(passConfirm, passConfirmName, this.passwordMatchCheck(input, passConfirm));
             // Remove green border
             this.removeValid(passConfirm);
         });
@@ -165,17 +190,19 @@ class Validation
 
 
 
-      /////////////////
-     // Flag Checks //
-    /////////////////
+      ////////////
+     // Checks //
+    ////////////
     /*
-        Flag checks return nothing if there are no validation issues.
+        Checks return nothing if there are no issues.
         If there is a validation issue, a string is returned that explains the issue.
         The main functions call these depending on their parameters.
+
+        Returns: String containing the error or blank
     */
 
     // Checks if too long or short
-    lengthFlag(input, minLength, maxLength)
+    lengthCheck(input, minLength, maxLength)
     {
         if (input.val().length <= minLength)
         {
@@ -192,7 +219,7 @@ class Validation
     }
 
     // Checks if contains unwanted text
-    illegalCharFlag(input, illegalCharArray)
+    illegalCharCheck(input, illegalCharArray)
     {
         // Reset loop stringe
         let illegalsUsed = "";
@@ -226,7 +253,7 @@ class Validation
     }
 
     // Check if doesnt contain needed text
-    necessaryCharFlag(input, necessaryCharArray)
+    necessaryCharCheck(input, necessaryCharArray)
     {
         let notUsed = "";
         // loop through each illegal item to check for
@@ -250,7 +277,7 @@ class Validation
     }
 
     // Ensure that input has at least one number
-    numberFlag(input)
+    numberCheck(input)
     {
         if (!input.val().match(/\d/))
         {
@@ -263,7 +290,7 @@ class Validation
     }
 
     // Ensure there is at least one special character
-    specialCharFlag(input)
+    specialCharCheck(input)
     {
         if (!input.val().match(/\W|_/g))
         {
@@ -276,7 +303,7 @@ class Validation
     }
 
     // Check if passwords match
-    passwordMatchFlag(input, passConfirm)
+    passwordMatchCheck(input, passConfirm)
     {
         if (input.val() === passConfirm.val())
         {
@@ -285,6 +312,19 @@ class Validation
         else
         {
             return "Passwords do not match. ";
+        }
+    }
+
+    // Use regex to require an email
+    emailCheck(input)
+    {
+        if (input.val().match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
+        {
+            return "";
+        }
+        else
+        {
+            return "Is not a proper email";
         }
     }
 
@@ -329,9 +369,9 @@ class Validation
 
                     // Perform all the checks that requireText() does, but only apply negative restrictions
                     invalidString = "";
-                    invalidString += this.lengthFlag(input, minLength, maxLength);
-                    invalidString += this.illegalCharFlag(input, illegalCharArray);
-                    invalidString += this.necessaryCharFlag(input, necessaryCharArray);
+                    invalidString += this.lengthCheck(input, minLength, maxLength);
+                    invalidString += this.illegalCharCheck(input, illegalCharArray);
+                    invalidString += this.necessaryCharCheck(input, necessaryCharArray);
                     if (invalidString)
                     {
                         this.showWarning(input, inputName, invalidString);
@@ -355,12 +395,12 @@ class Validation
 
                     // Perform all the checks that requireText() does, but only apply negative restrictions
                     invalidString = "";
-                    invalidString += this.lengthFlag(input, minLength, maxLength);
-                    invalidString += this.illegalCharFlag(input, illegalCharArray);
-                    invalidString += this.necessaryCharFlag(input, necessaryCharArray);
-                    invalidString += this.numberFlag(input);
-                    invalidString += this.specialCharFlag(input);
-                    invalidString += this.passwordMatchFlag(input, passConfirm);
+                    invalidString += this.lengthCheck(input, minLength, maxLength);
+                    invalidString += this.illegalCharCheck(input, illegalCharArray);
+                    invalidString += this.necessaryCharCheck(input, necessaryCharArray);
+                    invalidString += this.numberCheck(input);
+                    invalidString += this.specialCharCheck(input);
+                    invalidString += this.passwordMatchCheck(input, passConfirm);
                     if (invalidString)
                     {
                         this.showWarning(input, inputName, invalidString);
@@ -473,18 +513,6 @@ class Validation
 
 
 
-
-
 }
-
-
-
-
-
-
-
-
-
-
 
 
