@@ -4,12 +4,12 @@ Responsive jQuery &amp; es6 form validation for Bootstrap 4. Will highlight inpu
 
 # Setup
 
-## Requirements
+#### Requirements
 
 * Bootstrap 4
 * jQuery
 
-## Usage
+#### Usage
 
 1. Link the script into the head of the html file using:
 ```
@@ -44,7 +44,7 @@ myForm.requireEmail(inputName, minLength, maxLength, illegalCharArray, necessary
 
 # Function Documentation
 
-### requireText(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray);
+#### requireText(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray);
 
 * inputName (String)
   * The name of the input
@@ -66,9 +66,15 @@ myForm.requireEmail(inputName, minLength, maxLength, illegalCharArray, necessary
   * An array containing strings of anything needed in the input
   * All items in the array are necessary
 
-### requireEmail(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray);
+#### requireEmail(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray);
 
-* Operates exactly the same as requireText, but also ensures that the input matches the common email layout
+* Performs all operations that requireText() does
+* Also ensures input matches common email layout
 * Arguments operate exactly the same as the requireText ones
 
-### registerPassword(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmName);
+#### registerPassword(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmName);
+
+* Performs all operations that requireText() does
+* Also requires input to contain a number and special character
+* passConfirmName (String)
+  * String containing the name of a "Confirm your password" input

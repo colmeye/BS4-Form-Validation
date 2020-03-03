@@ -128,6 +128,7 @@ class Validation
         let input = $('input[name ="' + inputName + '"]');
         let passConfirm = $('input[name ="' + passConfirmName + '"]');
         let invalidString = "";
+        let invalidCheckString = "";
 
         // Create requried *
         this.createAsterisk(input);
@@ -136,13 +137,16 @@ class Validation
         // Add this input to the input log, for easy check alls
         this.inputLog.push(["registerPassword", inputName, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmName]);
         
-        // Check string for issues while editing
+        // On editing main password
         $(input).on('input focus', input, () =>
         {
             // Append any invalid issues to string when editing
             invalidString = "";
+            invalidCheckString = "";
+
             invalidString += this.lengthCheck(input, minLength, maxLength);
             invalidString += this.illegalCharCheck(input, illegalCharArray);
+
             this.showWarning(input, inputName, invalidString);
         });
 
@@ -163,18 +167,22 @@ class Validation
             this.removeValid(input);
         });
 
-        // Check if confirmation input matches the password input
+        // CONFIRM PASSWORD //
+
         $(passConfirm).on('input focus', passConfirm, () =>
         {
-            this.showWarning(passConfirm, passConfirmName, this.passwordMatchCheck(input, passConfirm));
+            invalidCheckString = "";
+            invalidCheckString += this.passwordMatchCheck(input, passConfirm);
+            this.showWarning(passConfirm, passConfirmName, invalidCheckString);
         });
 
         $(passConfirm).on('focusout', passConfirm, () =>
         {
-            this.showWarning(passConfirm, passConfirmName, this.passwordMatchCheck(input, passConfirm));
-            // Remove green border
             this.removeValid(passConfirm);
         });
+
+
+
 
         return invalidString;
     }
@@ -384,6 +392,8 @@ class Validation
                 // Check all password registration
                 if (this.inputLog[i][0] === "registerPassword")
                 {
+                    let invalidCheckString = "";
+
                     // Make block scope elements to help understand which elements in the array are which
                     let input = $('input[name ="' + this.inputLog[i][1] + '"]');
                     let inputName = this.inputLog[i][1];
@@ -391,7 +401,8 @@ class Validation
                     let maxLength = this.inputLog[i][3];
                     let illegalCharArray = this.inputLog[i][4];
                     let necessaryCharArray = this.inputLog[i][5];
-                    let passConfirm = $('input[name ="' + this.inputLog[i][6] + '"]');
+                    let passConfirmName = this.inputLog[i][6];
+                    let passConfirm = $('input[name="' + this.inputLog[i][6] + '"]');
 
                     // Perform all the checks that requireText() does, but only apply negative restrictions
                     invalidString = "";
@@ -400,7 +411,7 @@ class Validation
                     invalidString += this.necessaryCharCheck(input, necessaryCharArray);
                     invalidString += this.numberCheck(input);
                     invalidString += this.specialCharCheck(input);
-                    invalidString += this.passwordMatchCheck(input, passConfirm);
+                    invalidCheckString += this.passwordMatchCheck(input, passConfirm);
                     if (invalidString)
                     {
                         this.showWarning(input, inputName, invalidString);
@@ -408,7 +419,16 @@ class Validation
                         // Stop submission
                         e.preventDefault();
                     }
+                    if (invalidCheckString)
+                    {
+                        this.showWarning(passConfirm, passConfirmName, invalidCheckString);
+                        this.submitDisabled(true, "Error, please check your form");
+                        // Stop submission
+                        e.preventDefault();
+                    }
                 }
+
+
             });
         });
     }
@@ -433,6 +453,7 @@ class Validation
         }
         else
         {
+            this.generateFeedback(input, inputName, "", "");
             this.makeValid(input);
         }
     }

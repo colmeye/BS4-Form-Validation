@@ -18,6 +18,7 @@
 
     <div class="container mt-5">
         <div class="row justify-content-center">
+
             <div class="col-6 p-5 bg-white shadow-lg rounded">
 
                 <form name="test-form">
@@ -44,7 +45,33 @@
 
             </div>
         </div>
+
     </div>
+
+    <div class="container-fluid bg-white shadow-lg">
+        <div class="row justify-content-center" style="margin-top: 5em;">
+            <div class="col-6 p-5">
+
+                <div class="card">
+                    <div class="card-header">All it takes:</div>
+                    <div class="card-body text-monospace">
+
+                        <span class="text-success">// Create object for the form</span><br>
+                        let <span class="text-danger">form</span> = new Validation("test-form");<br>
+                        <span class="text-success">// Add inputs and requirements</span><br>
+                        <span class="text-danger">form</span>.<span class="text-primary">requireText(</span>"username", 4, 30, [" "], []<span class="text-primary">)</span>;<br>
+                        <span class="text-danger">form</span>.<span class="text-primary">requireEmail(</span>"email", 4, 30, [" "], ["@"]<span class="text-primary">)</span>;<br>
+                        <span class="text-danger">form</span>.<span class="text-primary">registerPassword(</span>"passwordOne", 3, 20, [" "], [], "passwordConfirm"<span class="text-primary">)</span>;
+
+                    </div>
+                </div>
+
+                
+
+            </div>
+        </div>
+    </div>
+
 
 
     <!-- Load Validation JS -->
@@ -53,9 +80,9 @@
         // Create object
         let form = new Validation("test-form");
         // Validation Functions
-        form.requireText("username", 4, 30, [" "], []);
+        form.requireText("username", 4, 20, [" "], []);
         form.requireEmail("email", 4, 30, [" "], ["@"]);
-        form.registerPassword("passwordOne", 3, 20, [" "], [], "passwordConfirm");
+        form.registerPassword("passwordOne", 6, 20, [" "], [], "passwordConfirm");
     </script>
 
 </body>
