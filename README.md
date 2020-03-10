@@ -1,5 +1,5 @@
 # BS4-Form-Validation
-Responsive jQuery &amp; es6 form validation for Bootstrap 4. Will highlight inputs red, and stops form submissions before the post request.
+Responsive jQuery & es6 form validation for Bootstrap 4. It highlights inputs red or green while editing if the content meets requirements. If there is an issue with any of the inputs, form submission will be disabled until the user makes a change.
 
 
 # Setup

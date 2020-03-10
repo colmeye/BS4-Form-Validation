@@ -76,7 +76,9 @@ class Validation
     }
 
 
-
+    /*
+        Same as require string, but also regex for proper email 
+    */
     requireEmail(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray)
     {
         let input = $('input[name ="' + inputName + '"]');
@@ -116,7 +118,6 @@ class Validation
 
         return invalidString;
     }
-
 
 
     /*
@@ -182,17 +183,8 @@ class Validation
         });
 
 
-
-
         return invalidString;
     }
-
-
-
-
-
-
-
 
 
 
@@ -353,7 +345,7 @@ class Validation
     }
 
 
-    // Check every input added to the object.
+
     checkAll()
     {
         $(this.form).submit( (e) =>
@@ -361,76 +353,56 @@ class Validation
             // Loop through every input added to object
             $(this.inputLog).each( (i) =>
             {
+                // Reset loop variables
                 let invalidString = "";
-                
+                let invalidCheckString = "";
+                let thisLog = this.inputLog[i];
 
-                // Check all requiredText inputs
-                if (this.inputLog[i][0] === "requireText")
+                // Make block scope elements to help understand which elements in the array are which
+                let inputName = thisLog[1];
+                let input = $('input[name ="' + inputName + '"]');
+                let minLength = thisLog[2];
+                let maxLength = thisLog[3];
+                let illegalCharArray = thisLog[4];
+                let necessaryCharArray = thisLog[5];
+                if (thisLog[0] === "registerPassword")
                 {
-                    // Make block scope elements to help understand which elements in the array are which
-                    let input = $('input[name ="' + this.inputLog[i][1] + '"]');
-                    let inputName = this.inputLog[i][1];
-                    let minLength = this.inputLog[i][2];
-                    let maxLength = this.inputLog[i][3];
-                    let illegalCharArray = this.inputLog[i][4];
-                    let necessaryCharArray = this.inputLog[i][5];
-
-                    // Perform all the checks that requireText() does, but only apply negative restrictions
-                    invalidString = "";
-                    invalidString += this.lengthCheck(input, minLength, maxLength);
-                    invalidString += this.illegalCharCheck(input, illegalCharArray);
-                    invalidString += this.necessaryCharCheck(input, necessaryCharArray);
-                    if (invalidString)
-                    {
-                        this.showWarning(input, inputName, invalidString);
-                        this.submitDisabled(true, "Error, please check your form");
-                        // Stop submission
-                        e.preventDefault();
-                    }
+                    var passConfirmName = thisLog[6];
+                    var passConfirm = $('input[name="' + passConfirmName + '"]');
                 }
 
-                // Check all password registration
-                if (this.inputLog[i][0] === "registerPassword")
+                // Check for issues
+                invalidString = "";
+                invalidString += this.lengthCheck(input, minLength, maxLength);
+                invalidString += this.illegalCharCheck(input, illegalCharArray);
+                invalidString += this.necessaryCharCheck(input, necessaryCharArray);
+                if (thisLog[0] === "registerPassword")
                 {
-                    let invalidCheckString = "";
-
-                    // Make block scope elements to help understand which elements in the array are which
-                    let input = $('input[name ="' + this.inputLog[i][1] + '"]');
-                    let inputName = this.inputLog[i][1];
-                    let minLength = this.inputLog[i][2];
-                    let maxLength = this.inputLog[i][3];
-                    let illegalCharArray = this.inputLog[i][4];
-                    let necessaryCharArray = this.inputLog[i][5];
-                    let passConfirmName = this.inputLog[i][6];
-                    let passConfirm = $('input[name="' + this.inputLog[i][6] + '"]');
-
-                    // Perform all the checks that requireText() does, but only apply negative restrictions
-                    invalidString = "";
-                    invalidString += this.lengthCheck(input, minLength, maxLength);
-                    invalidString += this.illegalCharCheck(input, illegalCharArray);
-                    invalidString += this.necessaryCharCheck(input, necessaryCharArray);
-                    invalidString += this.numberCheck(input);
                     invalidString += this.specialCharCheck(input);
                     invalidCheckString += this.passwordMatchCheck(input, passConfirm);
-                    if (invalidString)
-                    {
-                        this.showWarning(input, inputName, invalidString);
-                        this.submitDisabled(true, "Error, please check your form");
-                        // Stop submission
-                        e.preventDefault();
-                    }
-                    if (invalidCheckString)
-                    {
-                        this.showWarning(passConfirm, passConfirmName, invalidCheckString);
-                        this.submitDisabled(true, "Error, please check your form");
-                        // Stop submission
-                        e.preventDefault();
-                    }
+                }
+
+                // Display issues
+                if (invalidString)
+                {
+                    this.showWarning(input, inputName, invalidString);
+                    this.submitDisabled(true, "Error, please check your form");
+                    // Stop submission
+                    e.preventDefault();
+                }
+                if (invalidCheckString)
+                {
+                    this.showWarning(passConfirm, passConfirmName, invalidCheckString);
+                    this.submitDisabled(true, "Error, please check your form");
+                    // Stop submission
+                    e.preventDefault();
                 }
 
 
             });
+
         });
+
     }
 
 

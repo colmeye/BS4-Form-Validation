@@ -2,9 +2,12 @@
 <head>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style>
         label {
@@ -16,9 +19,9 @@
 
 <body class="bg-info">
 
+    <!-- FORM -->
     <div class="container mt-5">
         <div class="row justify-content-center">
-
             <div class="col-6 p-5 bg-white shadow-lg rounded">
 
                 <form name="test-form">
@@ -42,12 +45,11 @@
                     <input type="submit" class="btn btn-primary btn-block mt-5" value="Submit Form">
                 </form>
 
-
             </div>
         </div>
-
     </div>
 
+    <!-- CODE -->
     <div class="container-fluid bg-white shadow-lg">
         <div class="row justify-content-center" style="margin-top: 5em;">
             <div class="col-6 p-5">
@@ -59,9 +61,9 @@
                         <span class="text-success">// Create object for the form</span><br>
                         let <span class="text-danger">form</span> = new Validation("test-form");<br>
                         <span class="text-success">// Add inputs and requirements</span><br>
-                        <span class="text-danger">form</span>.<span class="text-primary">requireText(</span>"username", 4, 30, [" "], []<span class="text-primary">)</span>;<br>
-                        <span class="text-danger">form</span>.<span class="text-primary">requireEmail(</span>"email", 4, 30, [" "], ["@"]<span class="text-primary">)</span>;<br>
-                        <span class="text-danger">form</span>.<span class="text-primary">registerPassword(</span>"passwordOne", 3, 20, [" "], [], "passwordConfirm"<span class="text-primary">)</span>;
+                        <span class="text-danger">form</span>.<span class="text-primary">requireText(</span>"username", 4, 20, [" "], []<span class="text-primary">)</span>;<br>
+                        <span class="text-danger">form</span>.<span class="text-primary">requireEmail(</span>"email", 4, 30, [" "], []<span class="text-primary">)</span>;<br>
+                        <span class="text-danger">form</span>.<span class="text-primary">registerPassword(</span>"passwordOne", 6, 20, [" "], [], "passwordConfirm"<span class="text-primary">)</span>;
 
                     </div>
                 </div>
@@ -72,16 +74,20 @@
         </div>
     </div>
 
+    <!-- FOOTER -->
+    <nav class="navbar navbar-light bg-white justify-content-center">
+        <a class="navbar-brand" href="https://github.com/colmeye"><i class="fa fa-github"></i> colmeye</a>
+    </nav>
 
 
     <!-- Load Validation JS -->
-    <script type="text/javascript" src="bs4-form-validation.js"></script>
+    <script type="text/javascript" src="bs4-form-validation.min.js"></script>
     <script type="text/javascript">
         // Create object
         let form = new Validation("test-form");
         // Validation Functions
         form.requireText("username", 4, 20, [" "], []);
-        form.requireEmail("email", 4, 30, [" "], ["@"]);
+        form.requireEmail("email", 4, 30, [" "], []);
         form.registerPassword("passwordOne", 6, 20, [" "], [], "passwordConfirm");
     </script>
 
