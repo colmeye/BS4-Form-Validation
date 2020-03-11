@@ -74,6 +74,6 @@ myForm.requireEmail(inputId, minLength, maxLength, illegalCharArray, necessaryCh
 #### registerPassword(inputId, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmId);
 
 * Performs all operations that requireText() does
-* Also requires input to contain a number and special character
+* Also requires input to contain a number, special character, and capital letter
 * passConfirmId (String)
   * String containing the Id of a "Confirm your password" input

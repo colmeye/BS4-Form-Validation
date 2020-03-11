@@ -163,6 +163,7 @@ class Validation
         $(input).on('focusout', input, () =>
         {
             invalidString += this.necessaryCharCheck(input, necessaryCharArray);
+            invalidString += this.capitalCheck(input);
             invalidString += this.numberCheck(input);
             invalidString += this.specialCharCheck(input);
             this.showWarning(input, inputId, invalidString);
@@ -311,6 +312,19 @@ class Validation
         }
     }
 
+    // Regex for at least one capital
+    capitalCheck(input)
+    {
+        if (input.val().match(/[A-Z]+/))
+        {
+            return "";
+        }
+        else
+        {
+            return "Must contain capital letter. ";
+        }
+    }
+
     // Check if passwords match
     passwordMatchCheck(input, passConfirm)
     {
@@ -391,8 +405,9 @@ class Validation
                 }
                 if (thisLog[0] === "registerPassword")
                 {
-                    invalidString += this.specialCharCheck(input);
+                    invalidString += this.capitalCheck(input);
                     invalidString += this.numberCheck(input);
+                    invalidString += this.specialCharCheck(input);
                     invalidCheckString += this.passwordMatchCheck(input, passConfirm);
                 }
 
