@@ -31,7 +31,7 @@ let myForm = new Validation("FORM_NAME");
 <script>
 
 // Create the object for the form
-let myForm = new Validation("FORM_Id");
+let myForm = new Validation("FORM ID");
 
 // Inputs you would like to validate
 myForm.requireText(inputId, minLength, maxLength, illegalCharArray, necessaryCharArray);

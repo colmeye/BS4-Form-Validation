@@ -5,10 +5,10 @@
 class Validation
 {
 
-    constructor(formName)
+    constructor(formId)
     {
         // Form globals
-        this.form = $('form[name ="' + formName + '"]');
+        this.form = $("#" + formId);
         this.submitButton = $(this.form).find('input[type="submit"]');
         this.submitButtonText = this.submitButton.val();
 
@@ -88,7 +88,7 @@ class Validation
         this.createAsterisk(input);
 
         // Add this input to the input log, for easy check alls
-        this.inputLog.push(["requireText", inputId, minLength, maxLength, illegalCharArray, necessaryCharArray]);
+        this.inputLog.push(["requireEmail", inputId, minLength, maxLength, illegalCharArray, necessaryCharArray]);
             
         // Check string for issues while editing
         $(input).on('input focus', input, () =>
@@ -369,7 +369,7 @@ class Validation
 
                 // Make block scope elements to help understand which elements in the array are which
                 let inputId = thisLog[1];
-                let input = $('input[name ="' + inputId + '"]');
+                let input = $("#" + inputId);
                 let minLength = thisLog[2];
                 let maxLength = thisLog[3];
                 let illegalCharArray = thisLog[4];
@@ -377,7 +377,7 @@ class Validation
                 if (thisLog[0] === "registerPassword")
                 {
                     var passConfirmId = thisLog[6];
-                    var passConfirm = $('input[name="' + passConfirmId + '"]');
+                    var passConfirm = $("#" + passConfirmId);
                 }
 
                 // Check for issues
@@ -385,9 +385,14 @@ class Validation
                 invalidString += this.lengthCheck(input, minLength, maxLength);
                 invalidString += this.illegalCharCheck(input, illegalCharArray);
                 invalidString += this.necessaryCharCheck(input, necessaryCharArray);
+                if (thisLog[0] === "requireEmail")
+                {
+                    invalidString += this.emailCheck(input);
+                }
                 if (thisLog[0] === "registerPassword")
                 {
                     invalidString += this.specialCharCheck(input);
+                    invalidString += this.numberCheck(input);
                     invalidCheckString += this.passwordMatchCheck(input, passConfirm);
                 }
 
