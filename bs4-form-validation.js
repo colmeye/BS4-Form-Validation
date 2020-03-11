@@ -36,16 +36,16 @@ class Validation
     /*
         Make a general text input required for form submission.
     */
-    requireText(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray)
+    requireText(inputId, minLength, maxLength, illegalCharArray, necessaryCharArray)
     {
-        let input = $('input[name="' + inputName + '"]');
+        let input = $("#" + inputId);
         let invalidString = "";
 
         // Create requried *
         this.createAsterisk(input);
 
         // Add this input to the input log, for easy check alls
-        this.inputLog.push(["requireText", inputName, minLength, maxLength, illegalCharArray, necessaryCharArray]);
+        this.inputLog.push(["requireText", inputId, minLength, maxLength, illegalCharArray, necessaryCharArray]);
             
         // Check string for issues while editing
         $(input).on('input focus', input, () =>
@@ -54,7 +54,7 @@ class Validation
             invalidString = "";
             invalidString += this.lengthCheck(input, minLength, maxLength);
             invalidString += this.illegalCharCheck(input, illegalCharArray);
-            this.showWarning(input, inputName, invalidString);
+            this.showWarning(input, inputId, invalidString);
         });
 
         // Enable submit again on an input change
@@ -67,7 +67,7 @@ class Validation
         $(input).on('focusout', input, () =>
         {
             invalidString += this.necessaryCharCheck(input, necessaryCharArray);
-            this.showWarning(input, inputName, invalidString);
+            this.showWarning(input, inputId, invalidString);
             // Remove green border
             this.removeValid(input);
         });
@@ -79,16 +79,16 @@ class Validation
     /*
         Same as require string, but also regex for proper email 
     */
-    requireEmail(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray)
+    requireEmail(inputId, minLength, maxLength, illegalCharArray, necessaryCharArray)
     {
-        let input = $('input[name ="' + inputName + '"]');
+        let input = $("#" + inputId);
         let invalidString = "";
 
         // Create requried *
         this.createAsterisk(input);
 
         // Add this input to the input log, for easy check alls
-        this.inputLog.push(["requireText", inputName, minLength, maxLength, illegalCharArray, necessaryCharArray]);
+        this.inputLog.push(["requireText", inputId, minLength, maxLength, illegalCharArray, necessaryCharArray]);
             
         // Check string for issues while editing
         $(input).on('input focus', input, () =>
@@ -97,7 +97,7 @@ class Validation
             invalidString = "";
             invalidString += this.lengthCheck(input, minLength, maxLength);
             invalidString += this.illegalCharCheck(input, illegalCharArray);
-            this.showWarning(input, inputName, invalidString);
+            this.showWarning(input, inputId, invalidString);
         });
 
         // Enable submit again on an input change
@@ -111,7 +111,7 @@ class Validation
         {
             invalidString += this.necessaryCharCheck(input, necessaryCharArray);
             invalidString += this.emailCheck(input);
-            this.showWarning(input, inputName, invalidString);
+            this.showWarning(input, inputId, invalidString);
             // Remove green border
             this.removeValid(input);
         });
@@ -122,12 +122,12 @@ class Validation
 
     /*
         Used for registering passwords. Almost the same as the requireText() function. This function requires at least
-        one special character and number in the password. It is also possible to assign a confirmation input using passConfirmName.
+        one special character and number in the password. It is also possible to assign a confirmation input using passConfirmId.
     */
-    registerPassword(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmName)
+    registerPassword(inputId, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmId)
     {
-        let input = $('input[name ="' + inputName + '"]');
-        let passConfirm = $('input[name ="' + passConfirmName + '"]');
+        let input = $("#" + inputId);
+        let passConfirm = $("#" + passConfirmId);
         let invalidString = "";
         let invalidCheckString = "";
 
@@ -136,19 +136,21 @@ class Validation
         this.createAsterisk(passConfirm);
 
         // Add this input to the input log, for easy check alls
-        this.inputLog.push(["registerPassword", inputName, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmName]);
+        this.inputLog.push(["registerPassword", inputId, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmId]);
         
         // On editing main password
         $(input).on('input focus', input, () =>
         {
             // Append any invalid issues to string when editing
             invalidString = "";
-            invalidCheckString = "";
-
             invalidString += this.lengthCheck(input, minLength, maxLength);
             invalidString += this.illegalCharCheck(input, illegalCharArray);
+            this.showWarning(input, inputId, invalidString);
 
-            this.showWarning(input, inputName, invalidString);
+            // Check if passwords match
+            invalidCheckString = "";
+            invalidCheckString += this.passwordMatchCheck(input, passConfirm);
+            this.showWarning(passConfirm, passConfirmId, invalidCheckString);
         });
 
         // Enable submit again on an input change
@@ -163,9 +165,10 @@ class Validation
             invalidString += this.necessaryCharCheck(input, necessaryCharArray);
             invalidString += this.numberCheck(input);
             invalidString += this.specialCharCheck(input);
-            this.showWarning(input, inputName, invalidString);
+            this.showWarning(input, inputId, invalidString);
             // Remove green border
             this.removeValid(input);
+            this.removeValid(passConfirm);
         });
 
         // CONFIRM PASSWORD //
@@ -174,7 +177,13 @@ class Validation
         {
             invalidCheckString = "";
             invalidCheckString += this.passwordMatchCheck(input, passConfirm);
-            this.showWarning(passConfirm, passConfirmName, invalidCheckString);
+            this.showWarning(passConfirm, passConfirmId, invalidCheckString);
+        });
+
+        // Enable submit again on an input change
+        $(passConfirm).on('input', input, () =>
+        {
+            this.submitDisabled(false, this.submitButtonText);
         });
 
         $(passConfirm).on('focusout', passConfirm, () =>
@@ -359,16 +368,16 @@ class Validation
                 let thisLog = this.inputLog[i];
 
                 // Make block scope elements to help understand which elements in the array are which
-                let inputName = thisLog[1];
-                let input = $('input[name ="' + inputName + '"]');
+                let inputId = thisLog[1];
+                let input = $('input[name ="' + inputId + '"]');
                 let minLength = thisLog[2];
                 let maxLength = thisLog[3];
                 let illegalCharArray = thisLog[4];
                 let necessaryCharArray = thisLog[5];
                 if (thisLog[0] === "registerPassword")
                 {
-                    var passConfirmName = thisLog[6];
-                    var passConfirm = $('input[name="' + passConfirmName + '"]');
+                    var passConfirmId = thisLog[6];
+                    var passConfirm = $('input[name="' + passConfirmId + '"]');
                 }
 
                 // Check for issues
@@ -385,14 +394,14 @@ class Validation
                 // Display issues
                 if (invalidString)
                 {
-                    this.showWarning(input, inputName, invalidString);
+                    this.showWarning(input, inputId, invalidString);
                     this.submitDisabled(true, "Error, please check your form");
                     // Stop submission
                     e.preventDefault();
                 }
                 if (invalidCheckString)
                 {
-                    this.showWarning(passConfirm, passConfirmName, invalidCheckString);
+                    this.showWarning(passConfirm, passConfirmId, invalidCheckString);
                     this.submitDisabled(true, "Error, please check your form");
                     // Stop submission
                     e.preventDefault();
@@ -415,17 +424,17 @@ class Validation
     */
 
     // Perform restrictions depending on the input
-    showWarning(input, inputName, invalidString)
+    showWarning(input, inputId, invalidString)
     {
         // Provide proper styling and feedback
         if (invalidString)
         {
-            this.generateFeedback(input, inputName, "invalid-feedback", invalidString);
+            this.generateFeedback(input, inputId, "invalid-feedback", invalidString);
             this.makeInvalid(input);
         }
         else
         {
-            this.generateFeedback(input, inputName, "", "");
+            this.generateFeedback(input, inputId, "", "");
             this.makeValid(input);
         }
     }
@@ -482,30 +491,18 @@ class Validation
         $("<span class='text-danger'>*</span>").insertBefore(input)
     }
 
+
     // Creates responsive tiny text below inputs to inform user of issues
-    generateFeedback(input, inputName, validityClass, prompt)
+    generateFeedback(input, inputId, validityClass, prompt)
     {
-    /*
-    validity classes: valid-feedback or invalid-feedback
-    */
-        if ($('#' + inputName + '-feedback').length)
-        {
-            // Delete feedback if it already exists to make room for new content
-            $('#' + inputName + '-feedback').remove();
-            // Create new content
-            $("<div id='" + inputName + "-feedback' class='" + validityClass + "'>" + prompt + "</h2>").insertAfter(input);
-            
-        }
-        else
-        {
-            // Create feedback element if it does not exist
-            $("<div id='" + inputName + "-feedback' class='" + validityClass + "'>" + prompt + "</h2>").insertAfter(input);
-        }
+        // Delete feedback if it already exists to make room for new content
+        $('#' + inputId + '-feedback').remove();
+        
+        // Create feedback element if it does not exist
+        $('<div id="' + inputId + '-feedback" class="' + validityClass + '">' + prompt + '</div>').insertAfter(input);
     }
 
 
 
-
 }
-
 

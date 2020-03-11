@@ -16,7 +16,7 @@ Responsive jQuery & es6 form validation for Bootstrap 4. It highlights inputs re
 <script type="text/javascript" src="PATH_TO_FILE/bs4-form-validation.js"></script>
 ```
 
-2. Enter javascript tags before the last body tag. Create an object using the Validation class which will represent the entire form. The form's name should be the class parameter and a string. The submit button should be formatted as `<input type="submit">` to work properly.
+2. Enter javascript tags before the last body tag. Create an object using the Validation class which will represent the entire form. The form's Id should be the class parameter and a string. The submit button should be formatted as `<input type="submit">` to work properly.
 ```
 <script>
 
@@ -31,11 +31,11 @@ let myForm = new Validation("FORM_NAME");
 <script>
 
 // Create the object for the form
-let myForm = new Validation("FORM_NAME");
+let myForm = new Validation("FORM_Id");
 
 // Inputs you would like to validate
-myForm.requireText(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray);
-myForm.requireEmail(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray);
+myForm.requireText(inputId, minLength, maxLength, illegalCharArray, necessaryCharArray);
+myForm.requireEmail(inputId, minLength, maxLength, illegalCharArray, necessaryCharArray);
 
 </script>
 ```
@@ -44,11 +44,10 @@ myForm.requireEmail(inputName, minLength, maxLength, illegalCharArray, necessary
 
 # Function Documentation
 
-#### requireText(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray);
+#### requireText(inputId, minLength, maxLength, illegalCharArray, necessaryCharArray);
 
-* inputName (String)
-  * The name of the input
-  * NOT the id
+* inputId (String)
+  * The Id of the input
 
 * minLength (Int)
   * Minimum allowable length of input value
@@ -59,22 +58,22 @@ myForm.requireEmail(inputName, minLength, maxLength, illegalCharArray, necessary
 
 * illegalCharArray (Array)
   * An array containing strings of anything not allowed in the input
-  * Ex: `requireText(inputName, minLength, maxLength, ["illegal", "/", " ", "@"], necessaryCharArray);`
+  * Ex: `requireText(inputId, minLength, maxLength, ["illegal", "/", " ", "@"], necessaryCharArray);`
   * ^ This code will not allow the strings "illegal", "/", spaces, or "@" in the input.
 
 * necessaryCharArray (Array)
   * An array containing strings of anything needed in the input
   * All items in the array are necessary
 
-#### requireEmail(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray);
+#### requireEmail(inputId, minLength, maxLength, illegalCharArray, necessaryCharArray);
 
 * Performs all operations that requireText() does
 * Also ensures input matches common email layout
 * Arguments operate exactly the same as the requireText ones
 
-#### registerPassword(inputName, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmName);
+#### registerPassword(inputId, minLength, maxLength, illegalCharArray, necessaryCharArray, passConfirmId);
 
 * Performs all operations that requireText() does
 * Also requires input to contain a number and special character
-* passConfirmName (String)
-  * String containing the name of a "Confirm your password" input
+* passConfirmId (String)
+  * String containing the Id of a "Confirm your password" input
